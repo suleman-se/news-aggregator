@@ -68,7 +68,6 @@ The application follows SOLID principles and is organized into the following str
 - TypeScript
 - Vite
 - Tailwind CSS
-- React Query
 - Zustand
 - Axios
 - Date-fns
