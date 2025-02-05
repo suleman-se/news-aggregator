@@ -23,6 +23,5 @@ export interface NewsFilters {
   fromDate?: string;
   toDate?: string;
   categories: string[];
-  sources: string[];
   authors: string[];
 }

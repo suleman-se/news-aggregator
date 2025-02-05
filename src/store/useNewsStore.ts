@@ -12,8 +12,9 @@ export const useNewsStore = create<NewsStore>((set) => ({
   filters: {
     search: '',
     categories: [],
-    sources: [],
     authors: [],
+    fromDate: '',
+    toDate: '',
   },
   sources: [
     { id: 'newsapi', name: 'NewsAPI', enabled: true },

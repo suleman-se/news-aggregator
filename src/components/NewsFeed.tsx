@@ -16,14 +16,15 @@ export const NewsFeed: React.FC = () => {
       category: filters.categories.join(","),
       fromDate: filters.fromDate || undefined,
       toDate: filters.toDate || undefined,
+      authors: filters.authors.length ? filters.authors.join(",") : undefined,
     }),
-    [filters.search, filters.categories, filters.fromDate, filters.toDate]
+    [filters.search, filters.categories, filters.fromDate, filters.toDate, filters.authors]
   );
 
   const enabledSources = useMemo(() => sources.filter((s) => s.enabled), [sources]);
 
   useEffect(() => {
-    if (!filters.search.trim()) {
+    if (!filters.search.trim() && filters.categories.length === 0 && filters.authors.length === 0) {
       setArticles([]);
       return;
     }
@@ -54,12 +55,14 @@ export const NewsFeed: React.FC = () => {
     };
 
     fetchArticles();
-  }, [filters.search, enabledSources, payload]);
+  }, [filters.search, enabledSources, payload, filters.categories.length, filters.authors.length]);
 
-  if (!filters.search) {
+  if (!filters.search && filters.categories.length === 0 && filters.authors.length === 0) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-600">Enter a search term to find articles</h2>
+        <h2 className="text-2xl font-semibold text-gray-600">
+          Enter a search term or select a category/author to find articles
+        </h2>
       </div>
     );
   }
@@ -74,9 +77,13 @@ export const NewsFeed: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {articles.map((article) => (
-        <ArticleCard key={article.id} article={article} />
-      ))}
+      {articles.length > 0 ? (
+        articles.map((article) => <ArticleCard key={article.id} article={article} />)
+      ) : (
+        <div className="text-center col-span-3 text-gray-600">
+          No articles found. Try adjusting your filters.
+        </div>
+      )}
     </div>
   );
 };
