@@ -1,3 +1,26 @@
+interface NewsSource {
+  id: string;
+  name: string;
+  enabled: boolean;
+}
+
+interface NewsFilters {
+  search: string;
+  startDate?: Date;
+  endDate?: Date;
+  fromDate?: string;
+  toDate?: string;
+  categories: string[];
+  authors: string[];
+}
+
+export interface NewsStore {
+  filters: NewsFilters;
+  sources: NewsSource[];
+  setFilters: (filters: Partial<NewsFilters>) => void;
+  toggleSource: (sourceId: string) => void;
+}
+
 export interface Article {
   id: string;
   title: string;
@@ -8,20 +31,4 @@ export interface Article {
   source: string;
   category: string;
   author?: string;
-}
-
-export interface NewsSource {
-  id: string;
-  name: string;
-  enabled: boolean;
-}
-
-export interface NewsFilters {
-  search: string;
-  startDate?: Date;
-  endDate?: Date;
-  fromDate?: string;
-  toDate?: string;
-  categories: string[];
-  authors: string[];
 }

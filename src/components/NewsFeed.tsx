@@ -12,8 +12,8 @@ export const NewsFeed: React.FC = () => {
 
   const payload = useMemo(
     () => ({
-      q: filters.search,
-      category: filters.categories.join(","),
+      q: filters.search || undefined, // If no search query, use undefined
+      category: filters.categories.length ? filters.categories.join(",") : undefined,
       fromDate: filters.fromDate || undefined,
       toDate: filters.toDate || undefined,
       authors: filters.authors.length ? filters.authors.join(",") : undefined,
@@ -24,7 +24,8 @@ export const NewsFeed: React.FC = () => {
   const enabledSources = useMemo(() => sources.filter((s) => s.enabled), [sources]);
 
   useEffect(() => {
-    if (!filters.search.trim() && filters.categories.length === 0 && filters.authors.length === 0) {
+    // If no search query but user has selected categories, authors, or sources, fetch personalized feed
+    if (!filters.search && filters.categories.length === 0 && filters.authors.length === 0 && !filters.fromDate) {
       setArticles([]);
       return;
     }
@@ -55,14 +56,15 @@ export const NewsFeed: React.FC = () => {
     };
 
     fetchArticles();
-  }, [filters.search, enabledSources, payload, filters.categories.length, filters.authors.length]);
+  }, [filters.search, enabledSources, payload, filters.categories.length, filters.authors.length, filters.fromDate]);
 
   if (!filters.search && filters.categories.length === 0 && filters.authors.length === 0) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold text-gray-600">
-          Enter a search term or select a category/author to find articles
+          Your personalized news feed is empty.
         </h2>
+        <p className="text-gray-500">Select categories, sources, or authors to see relevant articles.</p>
       </div>
     );
   }

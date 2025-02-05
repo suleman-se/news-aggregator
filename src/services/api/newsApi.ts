@@ -24,7 +24,7 @@ const nytClient = axios.create({
 });
 
 type Payload = {
-  q: string;
+  q?: string;
   category?: string;
   fromDate?: string;
   toDate?: string;
@@ -61,7 +61,7 @@ export const fetchNewsApiArticles = async ({ q, category, fromDate, toDate, auth
   }
 };
 
-export const fetchGuardianArticles = async ({ q, category, fromDate, toDate, authors }: Payload): Promise<Article[]> => {
+export const fetchGuardianArticles = async ({ q, category, fromDate, toDate }: Payload): Promise<Article[]> => {
   try {
     let response = await guardianClient.get("/search", {
       params: {
@@ -73,7 +73,7 @@ export const fetchGuardianArticles = async ({ q, category, fromDate, toDate, aut
       },
     });
 
-      // Temporary fix as we are getting empty results with section filter
+    // Temporary fix as we are getting empty results with section filter
     if (response.data.response.results.length === 0 && category) {
       response = await guardianClient.get("/search", {
         params: { q, "from-date": fromDate, "to-date": toDate, orderBy: "newest" },
