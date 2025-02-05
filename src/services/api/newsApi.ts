@@ -30,11 +30,19 @@ const nytClient = axios.create({
 type Payload = {
   q: string;
   category?: string;
+  fromDate?: string; // YYYY-MM-DD format
+  toDate?: string;   // YYYY-MM-DD format
 };
 
-export const fetchNewsApiArticles = async ({ q, category }: Payload): Promise<Article[]> => {
+export const fetchNewsApiArticles = async ({ q, category, fromDate, toDate }: Payload): Promise<Article[]> => {
   const response = await newsApiClient.get("/", {
-    params: { q, category: category || undefined },
+    params: {
+      q,
+      category: category || undefined,
+      from: fromDate || undefined, // Start date filter
+      to: toDate || undefined, // End date filter
+      sortBy: "publishedAt",
+    },
   });
 
   return response.data.articles.map((article: any) => ({
@@ -45,22 +53,27 @@ export const fetchNewsApiArticles = async ({ q, category }: Payload): Promise<Ar
     imageUrl: article.urlToImage,
     publishedAt: article.publishedAt,
     source: article.source.name,
-    category: category || "general", 
+    category: category || "general",
     author: article.author,
   }));
 };
 
-export const fetchGuardianArticles = async ({ q, category }: Payload): Promise<Article[]> => {
+export const fetchGuardianArticles = async ({ q, category, fromDate, toDate }: Payload): Promise<Article[]> => {
   let response = await guardianClient.get("/search", {
     params: {
       q,
       section: category || undefined,
-    }
+      "from-date": fromDate || undefined, // The Guardian API uses `from-date`
+      "to-date": toDate || undefined, // The Guardian API uses `to-date`
+      orderBy: "newest",
+    },
   });
 
   // Temporary fix as we are getting empty results with section filter
   if (response.data.response.results.length === 0 && category) {
-    response = await guardianClient.get("/search", { params: { q } });
+    response = await guardianClient.get("/search", {
+      params: { q, "from-date": fromDate, "to-date": toDate, orderBy: "newest" },
+    });
   }
 
   return response.data.response.results.map((article: any) => ({
@@ -76,13 +89,16 @@ export const fetchGuardianArticles = async ({ q, category }: Payload): Promise<A
   }));
 };
 
-export const fetchNYTArticles = async ({ q, category }: Payload): Promise<Article[]> => {
-  const formattedCategory = category ? `section_name:("${category}")` : ""; // 🛑 FIX: Apply correct filtering
+export const fetchNYTArticles = async ({ q, category, fromDate, toDate }: Payload): Promise<Article[]> => {
+  const formattedCategory = category ? `section_name:("${category}")` : "";
 
   const response = await nytClient.get("/articlesearch.json", {
     params: {
       q,
       fq: formattedCategory,
+      begin_date: fromDate ? fromDate.replace(/-/g, "") : undefined, // Convert YYYY-MM-DD to YYYYMMDD
+      end_date: toDate ? toDate.replace(/-/g, "") : undefined, // Convert YYYY-MM-DD to YYYYMMDD
+      sort: "newest",
     },
   });
 
@@ -93,7 +109,7 @@ export const fetchNYTArticles = async ({ q, category }: Payload): Promise<Articl
     url: article.web_url,
     imageUrl: article.multimedia?.length
       ? `https://www.nytimes.com/${article.multimedia[0].url}`
-      : undefined, // 🛑 FIX: Ensure valid image URL
+      : undefined,
     publishedAt: article.pub_date,
     source: "The New York Times",
     category: category || article.section_name,

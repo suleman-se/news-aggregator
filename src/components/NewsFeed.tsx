@@ -7,11 +7,19 @@ import { Article } from "../types/news";
 
 export const NewsFeed: React.FC = () => {
   const { filters, sources } = useNewsStore();
-
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const payload = useMemo(() => ({ q: filters.search, category: filters.categories.join(',') }), [filters.search, filters.categories]);
+  const payload = useMemo(
+    () => ({
+      q: filters.search,
+      category: filters.categories.join(","),
+      fromDate: filters.fromDate || undefined,
+      toDate: filters.toDate || undefined,
+    }),
+    [filters.search, filters.categories, filters.fromDate, filters.toDate]
+  );
+
   const enabledSources = useMemo(() => sources.filter((s) => s.enabled), [sources]);
 
   useEffect(() => {
@@ -37,7 +45,6 @@ export const NewsFeed: React.FC = () => {
         });
 
         const results = await Promise.all(promises);
-
         setArticles(results.flat().sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()));
       } catch (error) {
         console.error("Error fetching articles:", error);
@@ -52,9 +59,7 @@ export const NewsFeed: React.FC = () => {
   if (!filters.search) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold text-gray-600">
-          Enter a search term to find articles
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-600">Enter a search term to find articles</h2>
       </div>
     );
   }

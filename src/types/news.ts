@@ -20,6 +20,8 @@ export interface NewsFilters {
   search: string;
   startDate?: Date;
   endDate?: Date;
+  fromDate?: string;
+  toDate?: string;
   categories: string[];
   sources: string[];
   authors: string[];
