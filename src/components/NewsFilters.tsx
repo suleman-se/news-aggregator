@@ -3,12 +3,13 @@ import { Search, Filter } from "lucide-react";
 import { useNewsStore } from "../store/useNewsStore";
 import { useDebounce } from "../hooks/useDebounce";
 
+const categories: string[] = ['general', 'business', 'technology', 'sports', 'entertainment', 'science', 'health'];
+
 export const NewsFilters: React.FC = () => {
   const { filters, setFilters, sources, toggleSource } = useNewsStore();
-  const [searchTerm, setSearchTerm] = useState(filters.search); // Local state for search input
-  const debouncedSearch = useDebounce(searchTerm, 500); // Debounced search
+  const [searchTerm, setSearchTerm] = useState(filters.search);
+  const debouncedSearch = useDebounce(searchTerm, 500); 
 
-  // Update global state *only* if the debounced value has changed
   useEffect(() => {
     if (debouncedSearch !== filters.search) {
       setFilters({ search: debouncedSearch });
@@ -44,6 +45,27 @@ export const NewsFilters: React.FC = () => {
               {source.name}
             </button>
           ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+        {categories.map((category) => (
+          <button
+            key={category}
+            className={`px-3 py-1 rounded-full text-sm ${
+              filters.categories.includes(category)
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            onClick={() =>
+              setFilters({
+                categories: filters.categories.includes(category)
+                  ? filters.categories.filter((c) => c !== category)
+                  : [...filters.categories, category],
+              })
+            }
+          >
+            {category}
+          </button>
+        ))}
         </div>
       </div>
     </div>

@@ -1,20 +1,21 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { useNewsStore } from "../store/useNewsStore";
 import { fetchNewsApiArticles, fetchGuardianArticles, fetchNYTArticles } from "../services/api/newsApi";
 import { Loader } from "lucide-react";
+import { Article } from "../types/news";
 
 export const NewsFeed: React.FC = () => {
   const { filters, sources } = useNewsStore();
-  const { search } = filters;
 
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const payload = useMemo(() => ({ q: filters.search, category: filters.categories.join(',') }), [filters.search, filters.categories]);
   const enabledSources = useMemo(() => sources.filter((s) => s.enabled), [sources]);
 
   useEffect(() => {
-    if (!search.trim()) {
+    if (!filters.search.trim()) {
       setArticles([]);
       return;
     }
@@ -25,19 +26,18 @@ export const NewsFeed: React.FC = () => {
         const promises = enabledSources.map((source) => {
           switch (source.id) {
             case "newsapi":
-              return fetchNewsApiArticles(search);
+              return fetchNewsApiArticles(payload);
             case "guardian":
-              return fetchGuardianArticles(search);
+              return fetchGuardianArticles(payload);
             case "nyt":
-              return fetchNYTArticles(search);
+              return fetchNYTArticles(payload);
             default:
               return Promise.resolve([]);
           }
         });
 
         const results = await Promise.all(promises);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-expect-error
+
         setArticles(results.flat().sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()));
       } catch (error) {
         console.error("Error fetching articles:", error);
@@ -47,9 +47,9 @@ export const NewsFeed: React.FC = () => {
     };
 
     fetchArticles();
-  }, [search, enabledSources]);
+  }, [filters.search, enabledSources, payload]);
 
-  if (!search) {
+  if (!filters.search) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-semibold text-gray-600">
@@ -70,8 +70,6 @@ export const NewsFeed: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {articles.map((article) => (
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
         <ArticleCard key={article.id} article={article} />
       ))}
     </div>
