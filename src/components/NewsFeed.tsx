@@ -1,15 +1,20 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { useNewsStore } from "../store/useNewsStore";
-import { fetchNewsApiArticles, fetchGuardianArticles, fetchNYTArticles } from "../services/api/newsApi";
+import {
+  fetchNewsApiArticles,
+  fetchGuardianArticles,
+  fetchNYTArticles,
+} from "../services/api/newsApi";
 import { Loader } from "lucide-react";
 import { Article } from "../types/news";
 import toast from "react-hot-toast";
 
 export const NewsFeed: React.FC = () => {
-  const { filters, sources } = useNewsStore();
+  const { filters, sources, hydrated } = useNewsStore();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
+  const hasMount = useRef(false);
 
   const payload = useMemo(() => ({
     q: filters.search || undefined,
@@ -22,7 +27,14 @@ export const NewsFeed: React.FC = () => {
   const enabledSources = useMemo(() => sources.filter((s) => s.enabled), [sources]);
 
   useEffect(() => {
-    if (!filters.search && filters.categories.length === 0 && filters.authors.length === 0 && !filters.fromDate) {
+    if (!hydrated) return;
+
+    if (!hasMount.current) {
+      hasMount.current = true;
+      return;
+    }
+
+    if ( !filters.search && filters.categories.length === 0 && filters.authors.length === 0 && !filters.fromDate && !filters.toDate) {
       setArticles([]);
       return;
     }
@@ -48,17 +60,32 @@ export const NewsFeed: React.FC = () => {
     };
 
     fetchArticles();
-  }, [filters, enabledSources, payload]);
+  }, [hydrated, payload, enabledSources, filters.search, filters.categories.length, filters.authors.length, filters.fromDate, filters.toDate]);
+
+  if ( !filters.search && filters.categories.length === 0 && filters.authors.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold text-gray-600">
+          Enter a search term or select a category/author to find articles
+        </h2>
+        <p className="text-gray-500">
+          Select categories, sources, or authors to see relevant articles.
+        </p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader className="animate-spin text-blue-600" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">News Feed</h2>
-
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader className="animate-spin text-blue-600" size={40} />
-        </div>
-      ) : articles.length === 0 ? (
+      {articles.length === 0 ? (
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold text-gray-600">No articles found.</h2>
           <p className="text-gray-500">Try adjusting your filters.</p>

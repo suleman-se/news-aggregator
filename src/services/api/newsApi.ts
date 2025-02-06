@@ -1,9 +1,17 @@
 import axios from "axios";
 import { Article } from "../../types/news";
+import toast from "react-hot-toast";
 
 const NEWS_API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 const GUARDIAN_API_KEY = import.meta.env.VITE_GUARDIAN_API_KEY;
 const NYT_API_KEY = import.meta.env.VITE_NYT_API_KEY;
+
+const getErrorMessage = (error: unknown): string => {
+  if (axios.isAxiosError(error) && error.response?.data) {
+    return error.response.data.message || "Something went wrong!";
+  }
+  return error instanceof Error ? error.message : "Unknown error occurred.";
+};
 
 const newsApiClient = axios.create({
   baseURL: "https://newsapi.org/v2",
@@ -92,7 +100,7 @@ export const fetchNewsApiArticles = async ({
 
     return articles;
   } catch (error) {
-    console.error("Error fetching NewsAPI articles:", error);
+    toast.error(getErrorMessage(error));
     return [];
   }
 };
@@ -134,7 +142,7 @@ export const fetchGuardianArticles = async ({
       })
     );
   } catch (error) {
-    console.error("Error fetching The Guardian articles:", error);
+    toast.error(getErrorMessage(error));
     return [];
   }
 };
@@ -184,7 +192,7 @@ export const fetchNYTArticles = async ({
       })
     );
   } catch (error) {
-    console.error("Error fetching NYT articles:", error);
+    toast.error(getErrorMessage(error));
     return [];
   }
 };
