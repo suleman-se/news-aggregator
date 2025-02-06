@@ -1,11 +1,7 @@
 import React from "react";
-import { Article } from "../types/news";
+import { ArticleCardProps } from "../types/news";
 import { Calendar, User, Newspaper } from "lucide-react";
 import { format } from "date-fns";
-
-interface ArticleCardProps {
-  article: Article;
-}
 
 export const ArticleCard: React.FC<ArticleCardProps> = ({ article }) => {
   return (

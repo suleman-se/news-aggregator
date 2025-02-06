@@ -4,6 +4,7 @@ import { useNewsStore } from "../store/useNewsStore";
 import { fetchNewsApiArticles, fetchGuardianArticles, fetchNYTArticles } from "../services/api/newsApi";
 import { Loader } from "lucide-react";
 import { Article } from "../types/news";
+import toast from "react-hot-toast";
 
 export const NewsFeed: React.FC = () => {
   const { filters, sources } = useNewsStore();
@@ -40,7 +41,7 @@ export const NewsFeed: React.FC = () => {
 
         setArticles(results.flat().sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()));
       } catch (error) {
-        console.error("Error fetching articles:", error);
+        toast.error(`Error fetching articles: ${error}`);
       } finally {
         setLoading(false);
       }

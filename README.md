@@ -6,6 +6,7 @@ A modern news aggregator built with React, TypeScript, and Vite that pulls artic
 
 - Search articles across multiple news sources
 - Filter articles by source
+- Personalize Filter and sources
 - Responsive design for mobile and desktop
 - Real-time search updates
 - Clean and modern UI
@@ -59,6 +60,7 @@ The application follows SOLID principles and is organized into the following str
 
 - `/src/components`: React components
 - `/src/services`: API integration and services
+- `/src/hooks`: Debounce hook
 - `/src/store`: State management using Zustand
 - `/src/types`: TypeScript interfaces and types
 
@@ -72,3 +74,4 @@ The application follows SOLID principles and is organized into the following str
 - Axios
 - Date-fns
 - Lucide React
+- React Hot Toast
